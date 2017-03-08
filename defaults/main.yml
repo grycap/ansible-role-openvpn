@@ -3,3 +3,4 @@
 openvpn_type_of_node: "front"
 openvpn_frontname: "slurmserver"
 manage_etc_hosts: true
+openvpn_front_ip: {{ansible_default_ipv4.address}}

@@ -14,6 +14,7 @@ The variables that can be passed to this role and a brief description about them
 	openvpn_type_of_node: "front"
 	openvpn_frontname: "slurmserver"
 	manage_etc_hosts: "true"
+	openvpn_front_ip: "10.0.0.8"
 
 Example Playbook
 ----------------

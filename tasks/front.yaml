@@ -16,6 +16,9 @@
     - name: update KEY_CN value
       lineinfile: dest=/etc/openvpn/easy-rsa/2.0/vars regexp='export KEY_CN=changeme' line='export KEY_CN=server_vpn' state=present
 
+    - name: update KEY_SIZE value
+      lineinfile: dest=/etc/openvpn/easy-rsa/2.0/vars regexp='export KEY_SIZE=1024' line='export KEY_SIZE=2048' state=present
+
     - name: create keys directory to save generated keys
       file: path=/etc/openvpn/easy-rsa/2.0/keys state=directory
 
@@ -41,7 +44,7 @@
       shell: . ./vars;KEY_CN=client;./build-key client chdir=/etc/openvpn/easy-rsa/2.0/ creates=/etc/openvpn/easy-rsa/2.0/keys/client.crt
 
     - name: create Diffie Hellman certificate
-      shell: . ./vars;./build-dh chdir=/etc/openvpn/easy-rsa/2.0/ creates=/etc/openvpn/easy-rsa/2.0/keys/dh1024.pem
+      shell: . ./vars;./build-dh chdir=/etc/openvpn/easy-rsa/2.0/ creates=/etc/openvpn/easy-rsa/2.0/keys/dh2048.pem
 
     - name: indicate where is the ca.crt file in server.conf
       lineinfile: dest=/etc/openvpn/server.conf regexp='ca ca.crt' line='ca /etc/openvpn/easy-rsa/2.0/keys/ca.crt' state=present
@@ -53,7 +56,7 @@
       lineinfile: dest=/etc/openvpn/server.conf regexp='key server.key' line='key /etc/openvpn/easy-rsa/2.0/keys/server.key' state=present
 
     - name: indicate where is the dh.pem file in server.conf
-      lineinfile: dest=/etc/openvpn/server.conf regexp='dh dh1024.pem' line='dh /etc/openvpn/easy-rsa/2.0/keys/dh1024.pem' state=present
+      lineinfile: dest=/etc/openvpn/server.conf regexp='dh dh2048.pem' line='dh /etc/openvpn/easy-rsa/2.0/keys/dh2048.pem' state=present
 
     - name: allow to use the same credentials for all clients
       lineinfile: dest=/etc/openvpn/server.conf regexp=';duplicate-cn' line='duplicate-cn' state=present

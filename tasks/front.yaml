@@ -25,14 +25,15 @@
     - name: fix a bug of openvpn
       file: src=/etc/openvpn/easy-rsa/2.0/openssl-1.0.0.cnf dest=/etc/openvpn/easy-rsa/2.0/openssl.cnf state=link
 
-    - name: update build-ca not to be interactive
-      command: sed -i".bak" -e 's/interact/batch/' build-ca chdir=/etc/openvpn/easy-rsa/2.0/
-
-    - name: update build-key not to be interactive
-      command: sed -i".bak" -e 's/interact/batch/' build-key chdir=/etc/openvpn/easy-rsa/2.0/
-
-    - name: update build-key-server not to be interactive
-      command: sed -i".bak" -e 's/interact/batch/' build-key-server chdir=/etc/openvpn/easy-rsa/2.0/
+    - name: update build-* not to be interactive
+      replace:
+        path: "{{ item }}"
+        regexp: '(.*)--interact(.*)?$'
+        replace: '\1--batch\2'
+      with_items:
+        - /etc/openvpn/easy-rsa/2.0/build-ca
+        - /etc/openvpn/easy-rsa/2.0/build-key
+        - /etc/openvpn/easy-rsa/2.0/build-key-server
 
     - name: create CA
       shell: . ./vars;./clean-all;./build-ca chdir=/etc/openvpn/easy-rsa/2.0/ creates=/etc/openvpn/easy-rsa/2.0/keys/ca.crt

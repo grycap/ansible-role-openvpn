@@ -9,10 +9,7 @@
         IM_MASTER_FQDN: vnode-0.localdomain
         manage_etc_hosts: false
 
-    - file:
-        path: /etc/openvpn/easy-rsa/2.0
-        state: directory
-        recurse: yes
+    - local_action: file path=/etc/openvpn/easy-rsa/2.0 state=directory recurse=yes
 
     - fetch:
         src: /etc/openvpn/easy-rsa/2.0/keys/ca.crt

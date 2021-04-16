@@ -1,18 +1,40 @@
     # Copy of the certificates
+    - stat:
+        path: /etc/openvpn/ca.crt
+      register: cacert
     - include: sudo_copy.yml src=/etc/openvpn/easy-rsa/2.0/keys/ca.crt dest=/etc/openvpn/ca.crt mode="0644" owner=root group=root
-    - include: sudo_copy.yml src=/etc/openvpn/easy-rsa/2.0/keys/client.crt dest=/etc/openvpn/client.crt mode="0644" owner=root group=root
-    - include: sudo_copy.yml src=/etc/openvpn/easy-rsa/2.0/keys/client.key dest=/etc/openvpn/client.key mode="0600" owner=root group=root
+      when: not cacert.stat.exists
  
-    # Copy the config file
-    - copy: src=/etc/openvpn/client.conf dest=/etc/openvpn/client.conf mode="0644" owner=root group=root
+    - stat:
+        path: /etc/openvpn/client.crt
+      register: clientcert
+    - include: sudo_copy.yml src=/etc/openvpn/easy-rsa/2.0/keys/client.crt dest=/etc/openvpn/client.crt mode="0644" owner=root group=root
+      when: not clientcert.stat.exists
+
+    - stat:
+        path: /etc/openvpn/client.key
+      register: clientkey
+    - include: sudo_copy.yml src=/etc/openvpn/easy-rsa/2.0/keys/client.key dest=/etc/openvpn/client.key mode="0600" owner=root group=root
+      when: not clientkey.stat.exists
+
+    - name: Create the file of client configuration
+      template: src=client.j2 dest=/etc/openvpn/client.conf mode="0644" owner=root group=root
 
     - name: execute the vpn client
       command: openvpn --config client.conf --daemon --log openvpn_client.log  chdir=/etc/openvpn/ creates=/etc/openvpn/openvpn_client.log
   
-    # Manage /etc/hosts of WN and FE  
-    - name: manage /etc/hosts
-      lineinfile: dest=/etc/hosts regexp="{{openvpn_frontname}}.localdomain" line="10.8.0.1 {{openvpn_frontname}}.localdomain {{openvpn_frontname}}"
-      when: manage_etc_hosts == true
-    - local_action: lineinfile dest=/etc/hosts regexp="{{ansible_hostname}}.localdomain" line="{{ansible_tun0.ipv4.address}} {{ansible_hostname}}.localdomain {{ansible_hostname}}"
-      delegate_facts: True
+    - block:
+      - name: Wait VPN to be up
+        pause:
+          seconds: 5
+
+      - name: Reload facts to get tun0 info
+        setup:
+
+      # Manage /etc/hosts of WN and FE  
+      - name: manage /etc/hosts
+        lineinfile: dest=/etc/hosts regexp="{{openvpn_frontname}}.localdomain" line="10.8.0.1 {{openvpn_frontname}}.localdomain {{openvpn_frontname}}"
+
+      - local_action: lineinfile dest=/etc/hosts regexp="{{ansible_hostname}}.localdomain" line="{{ansible_tun0.ipv4.address}} {{ansible_hostname}}.localdomain {{ansible_hostname}}"
+        delegate_facts: True
       when: manage_etc_hosts == true

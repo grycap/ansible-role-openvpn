@@ -1,0 +1,18 @@
+---
+- name: Converge
+  hosts: all
+  tasks:
+    - name: "Include grycap.openvpn front"
+      include_role:
+        name: "ansible-role-openvpn"
+      vars:
+        IM_MASTER_FQDN: vnode-0.localdomain
+        manage_etc_hosts: false
+
+    - name: "Include grycap.openvpn wn"
+      include_role:
+        name: "ansible-role-openvpn"
+      vars:
+        IM_MASTER_FQDN: vnode-0.localdomain
+        manage_etc_hosts: false
+        openvpn_type_of_node: wn

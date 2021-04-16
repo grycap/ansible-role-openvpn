@@ -35,7 +35,7 @@ jobs:
         run: pip3 install ansible molecule[docker] docker
 
       - name: Create /etc/openvpn/easy-rsa/2.0/keys dir
-        run: sudo mkdir -p /etc/openvpn/easy-rsa/2.0/keys && sudo chmod +R 777 /etc/openvpn
+        run: sudo mkdir -p /etc/openvpn/easy-rsa/2.0/keys && sudo chmod -R 777 /etc/openvpn
 
       - name: Run Molecule tests.
         run: molecule test

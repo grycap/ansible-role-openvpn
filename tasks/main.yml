@@ -1,12 +1,6 @@
 ---
     - name: Include "{{ansible_os_family}}" OpenVPN tasks
-      include: "{{ansible_os_family}}.yaml"
-
-    - name: copy the sample file of server configuration
-      template: src=server.j2 dest=/etc/openvpn/server.conf mode="0644" owner=root group=root
-
-    - name: copy the sample file of server configuration
-      template: src=client.j2 dest=/etc/openvpn/client.conf mode="0644" owner=root group=root
+      include_tasks: "{{ansible_os_family}}.yaml"
 
     - name: download easy-rsa
       get_url: url=https://build.openvpn.net/downloads/releases/easy-rsa-2.2.0_master.tar.gz dest=/tmp/easy-rsa.tar.gz validate_certs=False
@@ -18,4 +12,4 @@
       command: cp -R /tmp/easy-rsa-2.2.0_master/easy-rsa/ /etc/openvpn/ creates=/etc/openvpn/easy-rsa
 
     - name: Include "{{openvpn_type_of_node}}" OpenVPN recipe
-      include: "{{openvpn_type_of_node}}.yaml"
+      include_tasks: "{{openvpn_type_of_node}}.yaml"

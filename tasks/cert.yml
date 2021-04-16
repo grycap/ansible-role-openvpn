@@ -1,0 +1,55 @@
+---
+    - name: download easy-rsa
+      get_url: url=https://build.openvpn.net/downloads/releases/easy-rsa-2.2.0_master.tar.gz dest=/tmp/easy-rsa.tar.gz validate_certs=False
+
+    - name: decompress easy-rsa
+      unarchive: src=/tmp/easy-rsa.tar.gz dest=/tmp creates=/tmp/easy-rsa-2.2.0_master copy=no
+
+    - name: copy rsa files to the work directory
+      command: cp -R /tmp/easy-rsa-2.2.0_master/easy-rsa/ /etc/openvpn/ creates=/etc/openvpn/easy-rsa
+
+    - name: update KEY_COUNTRY value
+      lineinfile: dest=/etc/openvpn/easy-rsa/2.0/vars regexp='export KEY_COUNTRY="US"' line='export KEY_COUNTRY="ES"' state=present
+
+    - name: update KEY_PROVINCE value
+      lineinfile: dest=/etc/openvpn/easy-rsa/2.0/vars regexp='export KEY_PROVINCE="CA"' line='export KEY_PROVINCE="VALENCIA"' state=present
+
+    - name: update KEY_CITY value
+      lineinfile: dest=/etc/openvpn/easy-rsa/2.0/vars regexp='export KEY_CITY="SanFrancisco"' line='export KEY_CITY="Valencia"' state=present
+
+    - name: update KEY_ORG value
+      lineinfile: dest=/etc/openvpn/easy-rsa/2.0/vars regexp='export KEY_ORG="Fort-Funston"' line='export KEY_ORG="UPV"' state=present
+
+    - name: update KEY_CN value
+      lineinfile: dest=/etc/openvpn/easy-rsa/2.0/vars regexp='export KEY_CN=changeme' line='export KEY_CN=server_vpn' state=present
+
+    - name: update KEY_SIZE value
+      lineinfile: dest=/etc/openvpn/easy-rsa/2.0/vars regexp='export KEY_SIZE=1024' line='export KEY_SIZE=2048' state=present
+
+    - name: create keys directory to save generated keys
+      file: path=/etc/openvpn/easy-rsa/2.0/keys state=directory
+
+    - name: fix a bug of openvpn
+      file: src=/etc/openvpn/easy-rsa/2.0/openssl-1.0.0.cnf dest=/etc/openvpn/easy-rsa/2.0/openssl.cnf state=link
+
+    - name: update build-* not to be interactive
+      replace:
+        path: "{{ item }}"
+        regexp: '(.*)--interact(.*)?$'
+        replace: '\1--batch\2'
+      with_items:
+        - /etc/openvpn/easy-rsa/2.0/build-ca
+        - /etc/openvpn/easy-rsa/2.0/build-key
+        - /etc/openvpn/easy-rsa/2.0/build-key-server
+
+    - name: create CA
+      shell: . ./vars;./clean-all;./build-ca chdir=/etc/openvpn/easy-rsa/2.0/ creates=/etc/openvpn/easy-rsa/2.0/keys/ca.crt
+
+    - name: create key files for the server
+      shell: . ./vars;./build-key-server server chdir=/etc/openvpn/easy-rsa/2.0/ creates=/etc/openvpn/easy-rsa/2.0/keys/server.crt
+
+    - name: create key files for the clients
+      shell: . ./vars;KEY_CN=client;./build-key client chdir=/etc/openvpn/easy-rsa/2.0/ creates=/etc/openvpn/easy-rsa/2.0/keys/client.crt
+
+    - name: create Diffie Hellman certificate
+      shell: . ./vars;./build-dh chdir=/etc/openvpn/easy-rsa/2.0/ creates=/etc/openvpn/easy-rsa/2.0/keys/dh2048.pem

@@ -34,6 +34,9 @@ jobs:
       - name: Install test dependencies.
         run: pip3 install ansible molecule[docker] docker
 
+      - name: Create /etc/openvpn/easy-rsa/2.0 dir
+        run: sudo mkdir -p /etc/openvpn/easy-rsa/2.0
+
       - name: Run Molecule tests.
         run: molecule test
         env:

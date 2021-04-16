@@ -9,6 +9,26 @@
         IM_MASTER_FQDN: vnode-0.localdomain
         manage_etc_hosts: false
 
+    - file:
+        path: /etc/openvpn/easy-rsa/2.0
+        state: directory
+        recurse: yes
+
+    - fetch:
+        src: /etc/openvpn/easy-rsa/2.0/keys/ca.crt
+        dest: /etc/openvpn/easy-rsa/2.0/keys/ca.crt
+        flat: yes
+
+    - fetch:
+        src: /etc/openvpn/easy-rsa/2.0/keys/client.crt
+        dest: /etc/openvpn/easy-rsa/2.0/keys/client.crt
+        flat: yes
+
+    - fetch:
+        src: /etc/openvpn/easy-rsa/2.0/keys/client.key
+        dest: /etc/openvpn/easy-rsa/2.0/keys/client.key
+        flat: yes
+
     - name: "Include grycap.openvpn wn"
       include_role:
         name: "ansible-role-openvpn"
